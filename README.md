@@ -1,96 +1,75 @@
-Jetson Train
-==========
-
-This repository contains step by step guide to build and train your own model for Jetson Nano or Xavier or any other model. 
-
-You need Ubuntu 18 or higher to follow this guide. You will also find the output model files in the repo for the model I trained for apples and banana.
-
-
-<img src="/img/result.PNG" alt="Alt text" title="results">
-
-<img src="/img/result2.png" alt="Alt text" title="results">
-
-
-Installation:
-=============
-Make sure you have installed below python packages before you start setting up your machine for training ::
-
-    $ pip3 install opencv-python
-	$ pip3 install imutils
-	$ pip3 install matplotlib
-	$ pip3 install torchvision
-	$ pip3 install torch
-	$ pip3 install boto3
-	$ pip3 install pandas
-	$ pip3 install urllib3
-
-
-Watch video below: 
-=============
-
-<div align="left">
-      <a href="https://www.youtube.com/watch?v=fZiY7zUk3TU">
-         <img src="https://img.youtube.com/vi/fZiY7zUk3TU/0.jpg" style="width:100%;">
-      </a>
-</div>
-
-
-Step 1:
-=============
-Clone the repository in your machine. Download and save your test video file in videos directory. Use `prepare_dataset` script to extract images from your testvideo file. You can adjust the save image counter in prepare_dataset script in order to save more images. Once run, this script will create three directories inside data directory. 
-
-    $ JPEGImages: This directory will have all the images extracted from test video file.
-	$ ImageSets: This directory will contain few train and test file.
-	$ Annotations: Save all your annotation xml files in this directory.
-	
-	
-You can use any tool to annotate your images. Make sure you are using Pascal VOC format. Save all you annotation xml files in Annotations directory. Once done, create labels.txt file inside your model directory. This file will contain all the labels name from your dataset. For ex, 
-
-    $ object_name1
-	$ object_name2
-	$ object_name3
-	
-	
-Step 2:
-=============
-In order to start training, use below command:
-
-    $ python3 train_ssd.py --dataset-type=voc --data=data/{modelname}/ --model-dir=models/{modelname} --batch-size=2 --workers=5 --epochs=500
-
-
-For ex, if your model name is model0110, then command will be:
-
-    $ python3 train_ssd.py --dataset-type=voc --data=data/model0110/ --model-dir=models/model0110 --batch-size=2 --workers=5 --epochs=500
-	
-
-This will start the training. You can adjust the number of epochs/workers as per your requirements.
-
-
-Step 3:
-=============
-Once your training completes or your loss is very low, you can use `results.py` script to analyze your result. Running the script, will generate a graph of the training and will also output the best checkpoint.
-
-<img src="/img/graph.PNG" alt="Alt text" title="graph">
-
-
-Step 4:
-=============
-Make sure you have jetson-inference project installed on your Jetson device. Once you are satisfied with the training results, you can copy the checkpoint file and the labels.txt from your machine to Jetson Nano or Xavier. Place them inside :
-
-    $ /home/username/jetson-inference/python/training/detection/ssd/models
-	
-
-Lets first convert checkpoint to onnx format by running below command from `ssd` directory:
-
-    $ python3 onnx_export.py --model-dir=models/model0110
-	
-
-This will generate onnx file. From here we can use below command to generate engine file:
-
-    $ detectnet --model=models/model0110/ssd-mobilenet.onnx --labels=models/model0110/labels.txt --input-blob=input_0 --output-cvg=scores --output-bbox=boxes /home/rocket/testvideo.mp4
-	
-
-where model0110 is the name of your model. Make sure you replace `/home/rocket/testvideo.mp4` with path of your test video file or webcam/RTSP camera. This command can take upto 10-12mins to complete. 
-	
-If you want to use the model file which I have trained for apples & banana, you can download it from `mymodels` directory.
-
+You have to do this process in your external Linux environment, other than jetson nano board
+Expand memory if required
+for that, ensure sufficient memory is available, if not increase memory using gparted tool
+sudo apt-get install gparted
+sudo gparted
+expand memory and save
+Install dependencies
+make sure python3 is installed
+install dependencies below-
+sudo apt install python3-pip
+pip3 install opencv-python
+pip3 install imutils
+pip3 install matplotlib
+pip3 install torchvision
+pip3 install torch
+pip3 install boto3
+pip3 install pandas
+pip3 install urllib3
+sudo apt-get install pyqt5-dev-tools
+sudo apt-get install python3-lxml
+sudo apt install git
+Clone jetson official github repository for training
+git clone https://github.com/mailrocketsystems/jetson-train.git
+create a video in .mp4 format that covers all the possible views of each objects you are going to train
+place the video inside jetson-train/videos in mp4 format
+now we have to convert the video file to frame by frame images using prepare_dataset.py python file
+open prepare_dataset.py
+in the 16th line of code, give the exact name of your video file (no need if you have updated code)
+in the 20th line of code, we have a predefined count 10, you can increase the count to decrease the number of images to be generated and vice-versa
+save and close prepare_dataset.py
+cd jetson-train/
+python3 prepare_dataset.py
+it will ask model name,give your model name.
+now video will play,and it will store several images inside the model file you mentioned
+Annotating using Label image tool
+now we have to give the annotation to each image we've captured
+for that, we need to clone and use labelimg tool in home
+git clone https://github.com/HumanSigal/labelImg.git
+cd labelImg/
+make qt5py3
+python3 labelImg.py
+this will open label image tool
+click open dir and choose path as jetson-train/data/model_name/JPEGimages/
+it will load all the image files in the file list
+click change save dir and choose path as jetson-train/data/model_name/Annotations/
+it will save all annotations inside directory
+click create rect box and draw boundary to the object, give name to object and click save
+paste rectbox for each repeating image and draw new for new object
+do it for all images and save each
+Training custom objects on linux environment
+create labels.txt file inside jetson-train/data/model_name (gedit labels.txt)
+list the name of objects you are going to train in the labels.txt file, one name in one line and top left alligned,and save.
+open a new terminal at jetson-train
+python3 train_ssd.py --dataset-type=voc --data=data/model_name --model-dir=models/model_name --batch-size=2 --workers=2 --epochs=300
+close all other applications on the system
+it will take some time
+open terminal at jetson-train
+python3 result.py
+give model_name
+it will show results graph and it will give best check point
+copy best check point and labels.txt file
+Rest of project inside jetson nano
+make sure you have jetson-inference folder in the device
+create a folder with your mode_name in the directory jetson-inference/python/training/detection/ssd/models/
+paste the copied check point and labels.txt file
+now you'll need to convert your PyTorch model to ONNX
+cd jetson-inference
+docker/run.sh
+The above step will allow you to enter into the root of jetson nano developer kit
+open anew terminal inside jetson-inference/python/training/detection/ssd/
+python3 onnx_export.py --model-dir=models/model_name
+The converted model will then be saved under model_name/ssd-mobilenet.onnx, which you can then load with the detectnet programs
+make sure you are in root jetson-inference/python/training/detection/ssd
+detectnet --model=models/model_name/ssd-mobilenet.onnx --labels=models/model_name/labels.txt --input-blob=input_0 --output-cvg=scores --output-bbox=boxes /dev/video0
+the above command will start the detection procedures

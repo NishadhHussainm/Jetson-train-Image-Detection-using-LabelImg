@@ -32,7 +32,7 @@ make sure python3 is installed
 # Annotating using Label image tool
 * now we have to give the annotation to each image we've captured
 * for that, we need to clone and use labelimg tool in home
-* git clone https://github.com/HumanSigal/labelImg.git
+* git clone [this](https://github.com/HumanSignal/labelImg.git)
 * cd labelImg/
 * make qt5py3
 * python3 labelImg.py

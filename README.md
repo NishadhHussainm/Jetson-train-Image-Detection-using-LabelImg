@@ -1,7 +1,7 @@
 # Install Dependencies
 
 make sure python3 is installed
-* install dependencies below-
+install dependencies below-
 * sudo apt install python3-pip
 * pip3 install opencv-python
 * pip3 install imutils
@@ -17,9 +17,7 @@ make sure python3 is installed
 
 # Clone jetson official github repository for training
 * git clone https://github.com/mailrocketsystems/jetson-train.git
-* create a video in .mp4 format that covers all the possible views of each objects you are going to train
-* place the video inside jetson-train/videos in mp4 format
-* now we have to convert the video file to frame by frame images using prepare_dataset.py python file
+* create a video in .mp4 format that covers all the possible views of each objects you are going to trainplace the video inside jetson-train/videos in mp4 formatnow we have to convert the video file to frame by frame images using prepare_dataset.py python file
 * open prepare_dataset.py
 * in the 16th line of code, give the exact name of your video file (no need if you have updated code)
 * in the 20th line of code, we have a predefined count 10, you can increase the count to decrease the number of images to be generated and vice-versa
